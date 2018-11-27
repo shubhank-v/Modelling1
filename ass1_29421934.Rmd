@@ -1,0 +1,382 @@
+---
+title: "Assignment_1"
+output: word_document
+colortheme: "dolphin"
+autthor: Shubhank Vijayvergiya
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Question 1
+**part a**
+
+Time taken to examine the blood type of bag of blood = 2 mins  
+Time taken to transfer the blood = 2 mins  
+Time left with nurse = 20 mins  
+
+Thus, nurse has only 9 attempts (18 mins to test and 2 mins to transfer the blood) to save the victim.  
+*probability(victim will be saved)* = 1 - *probability(victim will die)*  
+*probability(victim will die in first examine) = 38/40*
+*probability(victim will die in second examine) = 37/39*
+...
+similarly,  
+*probability(victim will die in ninth examine) = 30/32*
+*probability(victim will die)* = $$38/40 * 37/39 * 36/38 * 35/37 * 34/36 * 33/35 * 32/34 * 31/33 * 30/32$$  
+*probability(victim wii die)* = $0.5961538$  
+*probability(victim will be saved)* = $1- 0.5961538$  => 0.4038462
+
+
+**part b**  
+Since, A+ blood type was not found in first 10 mins.  
+Thus, blood type of victim has been examined 5 times.  
+
+Time left to examine victim = 10 mins
+
+*probability(victim will not be saved 6th time)* = $33/35$  
+*probability(victim will not be saved 7th time)* = $32/34$  
+*probability(victim will not be saved 8th time)* = $31/33$  
+*probability(victim will not be saved 9th time)* = $30/32$  
+
+Thus,
+*probability(victim will not be saved|blood not found in first 10 mins) will be,*
+
+$$(33/35)* (32/34) * (31/33) * (30/32)$$
+= 0.7815126
+
+
+
+## Question 2
+**part a**
+$$\int_{0}^{1} x*3x^2 dx$$
+```{r}
+integral2a <- function(x) {x * 3*x^2}
+expectationX = integrate(integral2a, lower = 0, upper = 1)
+expectationX = expectationX[[1]]
+cat('E(X):', expectationX)
+```
+
+## Question 2
+**part b**  
+*Using variance formula:*
+$$V[X] = E[X^2] - E[X]^2$$
+
+```{r}
+
+# Evaluating E[X^2]
+integral2b = function(x){x^2 * 3*(x^2)}
+expec_x_sqr = integrate(integral2b, lower = 0, upper = 1)
+expec_x_sqr = expec_x_sqr[[1]]
+varianceX = expec_x_sqr - expectationX^2
+cat('V[X]:',varianceX)
+```
+
+## Question 2
+**part c**
+$$\int_{0}^{1} x^3 * (3x^2)^3 dx$$
+```{r}
+integral2c = function(x){x^3 * 3*(x^2)^3}
+expec_x_cube = integrate(integral2c, lower = 0, upper = 1)
+expec_x_cube = expec_x_cube[[1]]
+cat('E[X^3]:', expec_x_cube)
+```
+
+
+## Question 3
+
+Total population of the area = 35000  
+Total cases identified = 12  
+The annual rate of leukaemia = 1/10000
+
+Then, mean probability would be = 35000/10000 = 3.5
+
+Binomial distribution formula is given as,  
+$$ P(A) = \sum P(\{ (e_1,e_2..,e_n) \})  =  {{N}\choose{k}} \cdot p^kq^{N-k}$$
+
+```{r}
+# Applying binomial distribution
+dbinom(12, 35000, 1/10000)
+```
+Poisson's distribution formula is given as,  
+$$ P\left( x \right) = \frac{{e^{ - \lambda } \lambda ^x }}{{x!}} $$
+
+```{r}
+# Applying poisson distribution
+dpois(12, 3.5)
+```
+### Observation
+Intrestingly, binomial and poisson gives the similar probability, although probability of both the distributions is very low.  
+According to above distributions, identifying 12 cases of leukaemia is not a matter of chance.  
+The rural area is evident to have some problem.  
+
+*Poisson Distribution would be more suitable for this problem because,*  
+* A Poisson probability distribution is useful for describing the number of events that will occur during a specific interval of time or in a specific distance, area, or volume.  
+
+## Question 4
+**part a**
+
+#### *Loading Titanic.csv*
+``` {r}
+titanic <- read.csv("/Users/shubhank/Downloads/Titanic.csv", header = T, sep = ',')
+str(titanic)
+````
+
+#### *Calculating P(Survived)*
+```{r}
+p_survived = length(titanic$X[(titanic$Survived==1)])/length(titanic$X)
+cat('P(Survived):',p_survived) # 0.3838384
+```
+
+
+#### *Calculating P(Survived|Pclass = 1)*
+```{r}
+pclass_survived = length(titanic$X[(titanic$Pclass==1) & (titanic$Survived==1)])/length(titanic$Pclass[titanic$Pclass == 1])
+pclass_survived
+cat('P(Survived|Plcass = 1):', pclass_survived) # 0.6296296
+```
+
+**part b**
+
+#### *Calculating entropy of H(Embarked)*
+```{r}
+summary(titanic$Embarked)
+prob_c = length(titanic$Embarked[titanic$Embarked == 'C'])/length(titanic$Embarked)
+prob_s = length(titanic$Embarked[titanic$Embarked == 'S'])/length(titanic$Embarked)
+prob_q = length(titanic$Embarked[titanic$Embarked == 'Q'])/length(titanic$Embarked)
+prob_b = length(titanic$Embarked[titanic$Embarked == ''])/length(titanic$Embarked)
+
+c_entropy = prob_c * log2(1/prob_c)
+s_entropy = prob_s * log2(1/prob_s)
+q_entropy = prob_q * log2(1/prob_q)
+b_entropy = prob_b * log2(1/prob_b)
+
+embarked_entropy = c_entropy + q_entropy + s_entropy + b_entropy
+cat('H(Embarked):',embarked_entropy)
+
+```
+
+#### *Calculating entropy of H(Pclass)*
+```{r}
+# converting int data type to factors
+titanic$Pclass = as.factor(titanic$Pclass)
+summary(titanic$Pclass)
+
+prob_1 <- length(titanic$Pclass[titanic$Pclass==1])/length(titanic$Pclass) # 0.2424242
+prob_2 <- length(titanic$Pclass[titanic$Pclass==2])/length(titanic$Pclass) # 0.2065095
+prob_3 <- length(titanic$Pclass[titanic$Pclass==3])/length(titanic$Pclass) # 0.5510662
+
+entropy_1 = prob_1* log2(1/prob_1)
+entropy_2 = prob_2* log2(1/prob_2)
+entropy_3 = prob_3* log2(1/prob_3)
+pclass_entropy = entropy_1+ entropy_2+ entropy_3
+cat('H(Pclass):',pclass_entropy)
+```
+### Observation
+* Entropy of Pclass is higher than Embarked
+* The probability of passenger embarked from "S" is very high i.e 0.7227 thus decreasing overall Embarked entropy whereas probability of passenger from class(1,2,3) is equally distributed.
+
+
+**part c**  
+$$H(X|Y) = \sum_{Y=y} P(Y=y)*H(X|Y=y)$$
+### *Calculating H(Survived_guess1|P class)*
+```{r}
+# calculate probability(Survived_guess1|Pclass=1)
+prob_survived1_p1 = length(titanic$Survived_guess1[(titanic$Survived_guess1 == 1) & (titanic$Pclass == 1)])/length(titanic$Pclass[titanic$Pclass==1])
+
+
+# calculate probability(Survived_guess1|Pclass=2)
+prob_survived1_p2 = length(titanic$Survived_guess1[(titanic$Survived_guess1 == 1) & (titanic$Pclass == 2)])/length(titanic$Pclass[titanic$Pclass==2])
+
+# calculate probability(Survived_guess1|Pclass=3)
+prob_survived1_p3 = length(titanic$Survived_guess1[(titanic$Survived_guess1 == 1) & (titanic$Pclass == 3)])/length(titanic$Pclass[titanic$Pclass==3])
+
+# calculate entropy(Survived_guess1|Pclass=1)
+entropy_sur_p1 = prob_survived1_p1 * log2(1/prob_survived1_p1)
+
+
+# calculate entropy(Survived_guess1|Pclass=2)
+entropy_sur_p2 = prob_survived1_p2 * log2(1/prob_survived1_p2)
+
+
+# calculate entropy(Survived_guess1|Pclass=3)
+entropy_sur_p3 = prob_survived1_p3 * log2(1/prob_survived1_p3)
+
+# # calculate entropy(Survived_guess1|Pclass)
+entropy_sur1_pclass = prob_1*entropy_sur_p1 + prob_2*entropy_sur_p2
+cat('H(Survived_guess1|P class):',entropy_sur1_pclass)
+
+```
+
+### *Calculating H(Survived_guess2|P class)*  
+
+```{r}
+# calculate probability(Survived_guess1|Pclass=1)
+# calculate probability(Survived_guess1|Pclass=1)
+prob_survived2_p1 = length(titanic$Survived_guess2[(titanic$Survived_guess2 == 1) & (titanic$Pclass == 1)])/length(titanic$Pclass[titanic$Pclass==1])
+
+
+# calculate probability(Survived_guess1|Pclass=2)
+prob_survived2_p2 = length(titanic$Survived_guess2[(titanic$Survived_guess2 == 1) & (titanic$Pclass == 2)])/length(titanic$Pclass[titanic$Pclass==2])
+
+# calculate probability(Survived_guess1|Pclass=3)
+prob_survived2_p3 = length(titanic$Survived_guess2[(titanic$Survived_guess2 == 1) & (titanic$Pclass == 3)])/length(titanic$Pclass[titanic$Pclass==3])
+
+# calculate entropy(Survived_guess1|Pclass=1)
+entropy_sur2_p1 = prob_survived2_p1 * log2(1/prob_survived2_p1)
+
+# calculate entropy(Survived_guess1|Pclass=2)
+entropy_sur2_p2 = prob_survived2_p2 * log2(1/prob_survived2_p2)
+
+# calculate entropy(Survived_guess1|Pclass=3)
+entropy_sur2_p3 = prob_survived2_p3 * log2(1/prob_survived2_p3)
+
+# # calculate entropy(Survived_guess1|Pclass)
+entropy_sur2_pclass = prob_1*entropy_sur2_p1 + prob_2*entropy_sur2_p2#+ prob_3*entropy_sur2_p3
+cat('H(Survived_guess2|P class):',entropy_sur2_pclass)
+
+```
+## Question 5
+
+**part a**
+
+*Poisson distribution* would be suitable for this problem because:  
+* Spike signals has discrete distribution.  
+* Each occurrence is independent of the other occurrences.  
+* It describes discrete occurrences over an interval.  
+* The occurrences in each interval can range from zero to infinity.  
+* the rate of the signals remains constant over time  
+
+**part b**  
+Number of times the experiement was repeated = n  
+Number of spike signals recorded = Xn  
+PDF of poisson's distribution is given as,  
+
+$$ P\left( x \right) = \frac{{e^{ - \lambda } \lambda ^x }}{{x!}} $$  
+Likelihood function for poisson is given as,  
+Reference: https://www.statlect.com/fundamentals-of-statistics/Poisson-distribution-maximum-likelihood  
+$$ L({\theta}|x_1^n) = \frac{{e^{ - n\theta }{\theta} \sum_{i =1}^n }{x_i}}{{\prod_{i=1}^{n}x!}} $$  
+Taking log on both the sides,
+$$ ln \ L\left( \theta|x_1,x_2....x_n \right) = -n * \theta\ + {(\sum_{i=1}^n{x_i})}* \ ln \ * \theta + \ ln\ * (\prod_{i=1}^nx_i!) $$
+
+## Question 6
+
+**part a**
+```{r}
+# mean of normally distribured random numbers
+mu = 5
+
+# Variance of normally distributed random numbers
+# WKT,
+stdev = sqrt(10)
+
+# Calculating standard error for 10 
+stderr10 = stdev/sqrt(10) # SE: 1
+
+# Calculating standard error for 100 
+stderr100 = stdev/sqrt(100) # SE: 0.3162
+
+# Calculating standard error for 1000
+stderr1000 = stdev/sqrt(1000) # SE: 0.1
+
+# Calculating standard error for 10000
+stderr10000 = stdev/sqrt(10000) # SE: 0.03162
+
+```
+### Commenting about sample mean
+
+###### According to **Central Limit Theoram**  
++ The mean of the distribution of sample means is identical to the population that the samples are drawn from. As the sample size increases, mean of sample will be closer to mean of population.
+
+**part b**
+
+### Central limit theoram 
+* The mean of the distribution of sample means is identical to the population that the samples are drawn from.
+* The higher the sample size that is drawn, the less spread there will be in the sampling distribution of the mean.
+
+```{r}
+
+# generate 10000 random numbers from 1 to 100.
+total_population = sample(1:100,10000,replace = TRUE)
+# mean of total population
+mean(total_population) # 50.3182
+
+
+# create function to calculate CLT, passing sample size as a parameter
+clt <- function(sample_size) {
+  # create empty vector of length 50000, which will be populated with sample mean.
+  xbar = rep(0,50000)
+  # simulate 50000 iterations
+  for (i in 1:50000)
+    # calculate mean of sample and store in xbar vector
+    xbar[i] = mean(sample(total_population,sample_size))
+  # return mean of xbar
+  return(mean(xbar))
+}
+
+# simulating with sample size 10
+clt10 = clt(10) # mean: 50.270524
+
+# simulating with sample size 100
+clt100 = clt(100) # mean: 50.31327
+
+# simulating with sample size 10000
+clt1000 = clt(1000) # mean: 50.318136
+
+```
+### Observation
+
+* the mean of *clt10*, *clt100* and *clt1000* is identical to mean of total population
+* sample size 1000 has the closest mean
+
+**part c**
+
+```{r}
+# Generate random population of 10000 from 1 to 100
+population = sample(1:100,10000,replace = TRUE)
+# set sample size of 10
+sample_size = 10
+
+
+# create empty vector of length 50000, which will be populated with sample mean.
+z_score = rep(0,50000)
+# simulate 50000 iterations
+for (i in 1:50000){
+  z_score[i] = (mean(sample(population,10)) - mu)/(stdev/sqrt(sample_size))
+}
+
+# hist(X, prob=TRUE)            # prob=TRUE for probabilities not counts
+# lines(density(X))             # add a density estimate with defaults
+# lines(density(X, adjust=2), lty="dotted")
+
+# plot the histogram
+# https://www.statmethods.net/graphs/density.html
+histogram1 = hist(z_score, plot  = T, xlab = "z score mean", main = 'Histogram with normal curve')
+xfit1 = seq(min(z_score),max(z_score),length=40)
+yfit1 = dnorm(xfit1,mean=mean(z_score),sd=sd(z_score))
+yfit1 = yfit1*diff(histogram1$mids[1:2])*length(z_score)
+lines(xfit1, yfit1, col="blue", lwd=2)
+
+
+```
+
+```{r}
+# create empty vector of length 50000, which will be populated with sample mean.
+t_score = rep(0,50000)
+
+# simulate 50000 iterations
+for (i in 1:50000){
+  sample_population = sample(population,10)
+  xbar = mean(sample_population)
+  std = sd(sample_population)
+  t_score[i] = ((xbar - mu)/(std/sqrt(sample_size)))
+}
+# plot the histogram
+# https://www.statmethods.net/graphs/density.html
+histogram1 = hist(t_score, plot  = T, xlab = "t score mean", main = 'Histogram with normal curve')
+xfit1 = seq(min(t_score),max(t_score),length=40) 
+yfit1 = dnorm(xfit1,mean=mean(t_score),sd=sd(t_score)) 
+yfit1 = yfit1*diff(histogram1$mids[1:2])*length(t_score) 
+lines(xfit1, yfit1, col="blue", lwd=2)
+```
